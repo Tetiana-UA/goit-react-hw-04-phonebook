@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState } from "react";
 import styles from "./contacts-form.module.css";
 import { nanoid } from "nanoid";
 
@@ -7,36 +7,30 @@ const INITIAL_STATE={
     number: '',   
 }
 
-class ContactsForm extends Component {
+const ContactsForm =({onSubmit})=> {
+    const [state, setState] = useState([...INITIAL_STATE]);
 
-    contactNameId=nanoid();
-    contactNumberId=nanoid();
-
-    state = {...INITIAL_STATE}
-
-    
-    handleChange = ({target}) => {
+    const handleChange = ({target}) => {
     const {name, value}=target;
-    this.setState({
-        [name]:value
-        
+    setState({
+        ...state,
+        [name]:value,
     })
     }
 
-    handleSubmit = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        this.props.onSubmit({...this.state});
-        this.reset();
+        onSubmit({...state});
+        reset();
     }
-    reset(){
-    this.setState({...INITIAL_STATE})
+    const reset = () => {
+        setState({...INITIAL_STATE})
     }
 
-
-    render() {
+    const contactNameId=nanoid();
+    const contactNumberId=nanoid();
         
-        const{contactNameId, contactNumberId, handleSubmit,handleChange}=this;
-        const {name,number}=this.state
+    const {name,number}=state;
 
         return (
 
@@ -73,6 +67,6 @@ class ContactsForm extends Component {
             </form>
         );
     }
-}
+
  
 export default ContactsForm;

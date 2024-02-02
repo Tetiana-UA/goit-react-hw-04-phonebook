@@ -1,44 +1,37 @@
-import { Component } from "react";
+//Переписуємо компонент на хуки
+import { useState, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
-import styles from "./app.module.css";
-
 
 import ContactsForm from "./ContactsForm/ContactsForm";
 import ContactsList from "./ContactsList/ContactsList";
 import Filter from "./Filter/Filter";
 
-class App extends Component {
+import styles from "./app.module.css";
+
+const App = () => {
   
-  state = {
-    contacts: [
-        
-    ],
-    filter: '',
-  }
+  const [contacts, setContacts] = useState (() => {
+    const data=JSON.parse(localStorage.getItem("my-contacts"));
+    return data || [];
+  });
 
-  //У 3 домашній роботі  додаємо зберігання контактів телефонної книги в localStorage. Використовуємо методи життєвого циклу. Решта коду з 2 домашньої роботи.
-  componentDidMount(){
-    const contacts=JSON.parse(localStorage.getItem("my-contacts"));
-    if(contacts?.length){
-        this.setState({
-          contacts, 
-        })
-    }
-}
-  componentDidUpdate(_, prevState) {
-  const{contacts}=this.state;
-  if(prevState.contacts.length !== contacts.length){
-    console.log("update contacts");
-    localStorage.setItem("my-contacts", JSON.stringify(this.state.contacts) )
-  }
-}
+  const [filter, setFilter] = useState ("");
+  const firstRender = useRef(true);
 
+  useEffect(()=>{
+    if(!firstRender.current){
+      localStorage.setItem("my-contacts", JSON.stringify(contacts));
+  }
+  }, [contacts]);
+  
+useEffect (()=>{
+  firstRender.current=false;
+}, [])
+  
 
 //Перевіряємо на повтори контактів при введенні
-  isDublicate ({name,number}) {
-    const{contacts}=this.state;
-    console.log("name");
-
+  const isDublicate = ({name,number})=> {
+    
     const normalizedName=name.toLowerCase();
     const normalizedNumber=number.toLowerCase();
 
@@ -52,42 +45,30 @@ class App extends Component {
   }
 
 
-  addContact = (data) => {
-    if(this.isDublicate(data)) {
-      console.log(data);
-      return alert (`Contact with ${data.name} and ${data.number} already in list`)
+  const addContact = (data) => {
+    if(isDublicate(data)) {
+        return alert (`Contact with ${data.name} and ${data.number} already in list`)
     }
-    this.setState(({contacts}) => {
+      setContacts(prevContacts=> {
       const newContact={
         id:nanoid(),
         ...data,
       }
       return {
-        contacts:[...contacts, newContact]
+        contacts:[...prevContacts, newContact]
       } 
     })
     }
 
-  deleteContact =(id)=>{
-    this.setState(({contacts}) => {
-      const newContacts = contacts.filter(item => item.id !== id);
-
-      return{
-        contacts:newContacts,
-      }
-    })
+  const deleteContact =(id)=>{
+    setContacts(prevContacts =>prevContacts.filter(item => item.id !== id))
   }
 
-  changeFilter = ({target}) =>{
-    this.setState({
-      filter:target.value
-    })
-  }
+  const changeFilter = ({target}) => setFilter(target.value);
+  
 
-  getFilteredContacts (){
-  const {filter, contacts} =this.state;
-
-        if (!filter){
+  const getFilteredContacts = () => {
+    if (!filter){
           return contacts;
         }
     
@@ -101,9 +82,7 @@ class App extends Component {
     }
   
 
-  render() { 
-    const {addContact, deleteContact, changeFilter}=this;
-    const contacts=this.getFilteredContacts();
+    const items=getFilteredContacts();
 
     return (
         <div className={styles.wraper}>
@@ -111,13 +90,13 @@ class App extends Component {
         <ContactsForm onSubmit={addContact}/>
 
         <h2 className={styles.title}>Contacts</h2>
-        <Filter changeFilter={changeFilter} filter={this.state.filter}/>
-        <ContactsList items={contacts} deleteContact={deleteContact}/>
+        <Filter changeFilter={changeFilter} filter={filter}/>
+        <ContactsList items={items} deleteContact={deleteContact}/>
         </div>
  
 
     );
   }
-}
+
  
 export default App;
