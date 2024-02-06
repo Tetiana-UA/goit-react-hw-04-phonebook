@@ -8,7 +8,7 @@ const INITIAL_STATE={
 }
 
 const ContactsForm =({onSubmit})=> {
-    const [state, setState] = useState([...INITIAL_STATE]);
+    const [state, setState] = useState({...INITIAL_STATE});
 
     const handleChange = ({target}) => {
     const {name, value}=target;
