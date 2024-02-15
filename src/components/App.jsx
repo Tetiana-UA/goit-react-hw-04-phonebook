@@ -49,15 +49,13 @@ useEffect (()=>{
     if(isDublicate(data)) {
         return alert (`Contact with ${data.name} and ${data.number} already in list`)
     }
-      setContacts(prevContacts=> {
-      const newContact={
-        id:nanoid(),
-        ...data,
-      }
-      return {
-        contacts:[...prevContacts, newContact]
-      } 
-    })
+      
+    const newContact={
+      id:nanoid(),
+      ...data,
+    } 
+    setContacts(prevContacts => [...prevContacts, newContact]) 
+
     }
 
   const deleteContact =(id)=>{
